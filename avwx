@@ -3,13 +3,25 @@
 CACHE_PATH="${HOME}/.cache/afd.txt"
 CONFIG_PATH="${HOME}/.config/afd.cfg"
 
-BASE_URL="https://aviationweather.gov/api/data/fcstdisc?cwa="
+BASE_URL="https://aviationweather.gov/api/data"
 
 afd() {
 	local default="kpah"
-	local station_id="${1:-$default}"
+	local id="${1:-$default}"
+	local url="${BASE_URL}/fcstdisc?cwa=${id}&type=af"
+	curl -s "$url" | bat
+}
 
-	curl -s "${BASE_URL}${station_id}&type=af" | bat
+metar() {
+	local id="${1:-$default}"
+	local url="${BASE_URL}/metar?ids=${id}&format=raw"
+	curl -s "$url" && echo
+}
+
+taf() {
+	local id="${1:-$default}"
+	local url="${BASE_URL}/taf?ids=${id}&format=raw"
+	curl -s "$url" && echo
 }
 
 main() {
@@ -24,10 +36,10 @@ main() {
 			echo "Implement ATIS"
 			;;
 		metar)
-			echo "Implement METAR"
+			metar ${2}
 			;;
 		taf)
-			echo "Implement TAF"
+			taf ${2}
 			;;
 		.)
 			echo "Default weather case. METAR/ATIS, TAF, AF"
