@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+
+CACHE_PATH="${HOME}/.cache/afd.txt"
+CONFIG_PATH="${HOME}/.config/afd.cfg"
+
+BASE_URL="https://aviationweather.gov/api/data/fcstdisc?cwa="
+
+main() {
+	local default="kpah"
+	local station_id="${1:-$default}"
+
+	curl -s "${BASE_URL}${station_id}&type=af" | bat
+}
+
+main
