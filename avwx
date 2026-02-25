@@ -5,11 +5,37 @@ CONFIG_PATH="${HOME}/.config/afd.cfg"
 
 BASE_URL="https://aviationweather.gov/api/data/fcstdisc?cwa="
 
-main() {
+afd() {
 	local default="kpah"
 	local station_id="${1:-$default}"
 
 	curl -s "${BASE_URL}${station_id}&type=af" | bat
 }
 
-main
+main() {
+	case "$1" in
+		af)
+			echo "Implement area forecast (short)"
+			;;
+		afd) # area forecast discussion (full)
+			afd ${2}
+			;;
+		atis)
+			echo "Implement ATIS"
+			;;
+		metar)
+			echo "Implement METAR"
+			;;
+		taf)
+			echo "Implement TAF"
+			;;
+		.)
+			echo "Default weather case. METAR/ATIS, TAF, AF"
+			;;
+		*)
+			echo "Usage: $0 {af|afd|atis|metar|taf|.} [station]"
+			;;
+	esac
+}
+
+main ${@}
