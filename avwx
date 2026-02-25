@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
+G='\033[0;32m'
+NC='\033[0m'
+
 CACHE_PATH="${HOME}/.cache/afd.txt"
 CONFIG_PATH="${HOME}/.config/afd.cfg"
 
@@ -45,7 +48,7 @@ main() {
 			echo "Default weather case. METAR/ATIS, TAF, AF"
 			;;
 		*)
-			echo "Usage: $0 {af|afd|atis|metar|taf|.} [station]"
+			echo -e "Usage: ${G}avwx {af|afd|atis|metar|taf|.} [station]${NC}"
 			;;
 	esac
 }
