@@ -12,7 +12,7 @@ copy_file() {
 	OK "Copied to user local executable dir: ${LOCAL_BIN}"
 }
 
-echo "Installing script..."
+echo "Installing script..." && sleep 1
 
 if [[ -f "${LOCAL_BIN}/avwx" ]]; then
 	repo_filesize=$(stat -c %s "avwx")
@@ -22,12 +22,11 @@ if [[ -f "${LOCAL_BIN}/avwx" ]]; then
 		echo "File change detected. ${repo_filesize} ${exe_filesize}"
 		copy_file
 	else
-		OK "File already exists in local executable dir: ${G}${LOCAL_BIN}${NC}"
+		OK "Identical file already exists: ${G}${LOCAL_BIN}/avwx${NC}"
 	fi
 else
 	copy_file
 fi
 
-OK "Use with '${G}avwx [command] [station]${NC}'"
-echo -e "   or set default in ${G}${HOME}/.config/avwx.cfg${NC}"
-
+echo -e "Usage: '${G}avwx [command] [station]${NC}'"
+echo -e "Set default station in ${G}${HOME}/.config/avwx.cfg${NC}"
