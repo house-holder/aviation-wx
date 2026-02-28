@@ -1,23 +1,34 @@
 #!/usr/bin/env bash
 
+# CONSTANTS --------------------------------------------------------------------
 G='\033[0;32m'
 NC='\033[0m'
 
-CACHE_PATH="${HOME}/.cache/afd.txt"
+CACHE_PATH="${HOME}/.cache/aviation-wx.json"
 CONFIG_PATH="${HOME}/.config/afd.cfg"
 
 BASE_URL="https://aviationweather.gov/api/data"
 
-afd() {
+# CORE WX FUNCS ----------------------------------------------------------------
+discussion() {
 	local default="kpah"
 	local id="${1:-$default}"
-	local url="${BASE_URL}/fcstdisc?cwa=${id}&type=af"
-	curl -s "$url" | bat
+	local type="${2:-"af"}"
+	local url="${BASE_URL}/fcstdisc?cwa=${id}&type=${type}"
+
+	curl -s "$url"
+
+	# if [[ $type == "af" ]]; then
+	# 	curl -s "$url" | bat
+	# else
+	# 	curl -s "$url"
+	# fi
 }
 
 metar() {
-	local id="${1:-$default}"
-	local url="${BASE_URL}/metar?ids=${id}&format=raw"
+	local id="${1}"
+	local format="${2:-"raw"}"
+	local url="${BASE_URL}/metar?ids=${id}&format=${format}"
 	curl -s "$url" && echo
 }
 
@@ -27,22 +38,52 @@ taf() {
 	curl -s "$url" && echo
 }
 
+# HELPERS ----------------------------------------------------------------------
+cache_wx() {
+	local station_id=${1}
+
+	# if station_id changes, flush cache file to a bare json object:
+	{
+		"metar": {},
+		"taf": {},
+		"af": {},
+		"afd": {},
+	}
+}
+get_station_coords() {
+	local station_id=${1}
+	local json_result=$(metar ${station_id} "json")
+	echo $json_result
+	
+	# is the station cached? if so, coords are there
+	
+	# if cache is not the requested station, fetch new -> collect coords
+}
+
 main() {
+	local station_id=${2}
+
 	case "$1" in
+		x) # generic tester command
+			get_station_coords ${station_id}
+			# station=${2}
+			# result=$(get_station_coords kcgi)
+			# echo "Result: $result"
+			;;
 		af)
-			echo "Implement area forecast (short)"
+			discussion ${station_id}
 			;;
 		afd) # area forecast discussion (full)
-			afd ${2}
+			discussion ${station_id} "afd"
 			;;
 		atis)
 			echo "Implement ATIS"
 			;;
 		metar)
-			metar ${2}
+			metar ${station_id}
 			;;
 		taf)
-			taf ${2}
+			taf ${station_id}
 			;;
 		.)
 			echo "Default weather case. METAR/ATIS, TAF, AF"
