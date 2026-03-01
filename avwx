@@ -9,12 +9,12 @@ CONFIG_PATH="${HOME}/.config/afd.cfg"
 
 BASE_URL="https://aviationweather.gov/api/data"
 
-# CORE WX FUNCS ----------------------------------------------------------------
+
+# WEATHER FUNCS ----------------------------------------------------------------
 discussion() {
-	local default="kpah"
-	local id="${1:-$default}"
+	local cwa="kpah"
 	local type="${2:-"af"}"
-	local url="${BASE_URL}/fcstdisc?cwa=${id}&type=${type}"
+	local url="${BASE_URL}/fcstdisc?cwa=${cwa}&type=${type}"
 
 	curl -s "$url"
 
@@ -38,18 +38,27 @@ taf() {
 	curl -s "$url" && echo
 }
 
-# HELPERS ----------------------------------------------------------------------
+
+# CACHING ----------------------------------------------------------------------
 cache_wx() {
 	local station_id=${1}
 
 	# if station_id changes, flush cache file to a bare json object:
-	{
-		"metar": {},
-		"taf": {},
-		"af": {},
-		"afd": {},
-	}
 }
+
+flush_cache() {
+	echo "Not implemented"
+	# IDEAL EMPTY CACHE STRUCTURE (EOF?):
+	# {
+	# 	"station": { "id": "", "coords": { "lat": 0, "lon": 0 }},
+	# 	"metar": { "raw": "", "time": 0, },
+	# 	"taf": { "raw": "", "time": 0, },
+	# 	"af": { "raw": "", "time": 0, },
+	# 	"afd": { "raw": "", "time": 0, },
+	# }
+}
+
+# HELPERS ----------------------------------------------------------------------
 get_station_coords() {
 	local station_id=${1}
 	local json_result=$(metar ${station_id} "json")
@@ -58,26 +67,41 @@ get_station_coords() {
 	# is the station cached? if so, coords are there
 	
 	# if cache is not the requested station, fetch new -> collect coords
+	
+	printf '%s\n%s\n' "$lat" "$long"
+}
+
+get_cwa() {
+	local station_id=${1}
+
+	local url="https://api.weather.gov/points/${lat},${long}"
+	local json_result=$(curl -s "$url")
+
+	echo "K$(jq -r '.properties.cwa' <<< "$json_result")"
+}
+
+check_deps() {
+	if ! command -v jq &>/dev/null; then
+		echo -e "Error: '${g}jq${nc}' required but not installed. Exiting..."
+		exit 1
+	fi
 }
 
 main() {
-	local station_id=${2}
+	check_deps
 
-	case "$1" in
+	local station_id=${1}
+
+	case "$2" in
 		x) # generic tester command
-			get_station_coords ${station_id}
-			# station=${2}
-			# result=$(get_station_coords kcgi)
-			# echo "Result: $result"
+			# get_station_coords ${station_id}
+			echo "CWA: $(get_cwa 37.225 -89.578)"
 			;;
 		af)
 			discussion ${station_id}
 			;;
-		afd) # area forecast discussion (full)
+		afd)
 			discussion ${station_id} "afd"
-			;;
-		atis)
-			echo "Implement ATIS"
 			;;
 		metar)
 			metar ${station_id}
@@ -85,11 +109,13 @@ main() {
 		taf)
 			taf ${station_id}
 			;;
-		.)
-			echo "Default weather case. METAR/ATIS, TAF, AF"
-			;;
+		# atis)
+		# 	echo "Implement ATIS"
+		# 	;;
 		*)
-			echo -e "Usage: ${G}avwx {af|afd|atis|metar|taf|.} [station]${NC}"
+			metar ${station_id}
+			taf ${station_id}
+			discussion ${station_id} "afd"
 			;;
 	esac
 }
