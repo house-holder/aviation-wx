@@ -16,13 +16,13 @@ discussion() {
 	local type="${2:-"af"}"
 	local url="${BASE_URL}/fcstdisc?cwa=${cwa}&type=${type}"
 
-	curl -s "$url"
+	# curl -s "$url"
 
-	# if [[ $type == "af" ]]; then
-	# 	curl -s "$url" | bat
-	# else
-	# 	curl -s "$url"
-	# fi
+	if [[ $type == "af" ]]; then
+		curl -s "$url" | bat
+	else
+		curl -s "$url"
+	fi
 }
 
 metar() {
