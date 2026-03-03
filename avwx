@@ -56,6 +56,9 @@ flush_cache() {
 	# 	"af": { "raw": "", "time": 0, },
 	# 	"afd": { "raw": "", "time": 0, },
 	# }
+	#
+	# need to write empty and output write
+	# ?
 }
 
 # HELPERS ----------------------------------------------------------------------
